@@ -1,0 +1,43 @@
+{% extends 'front/base.html' %}
+{% load static %}
+ {% block content %}
+	<!--start-breadcrumbs-->
+	<div class="breadcrumbs">
+		<div class="container">
+			<div class="breadcrumbs-main">
+				<ol class="breadcrumb">
+					<li><a href="{% url 'index' %}">Home</a></li>
+					<li class="active">Register</li>
+				</ol>
+			</div>
+		</div>
+	</div>
+	<!--end-breadcrumbs-->
+	<!--register-starts-->
+	<div class="register">
+		<div class="container">
+			<div class="register-top heading">
+				<h2>REGISTER</h2>
+			</div>
+			<form action="{% url 'register' %}" method="post" enctype="multipart/form-data">
+				{% csrf_token %}
+				<div class="register-main">
+					<div class="col-md-6 account-left">
+						
+							<input placeholder="Username " type="email" tabindex="3" name="username" required>
+							
+					</div>
+					<div class="col-md-6 account-left">
+						<input placeholder="Password" type="password" tabindex="4" name="password" required>
+							<input placeholder="Retype password" type="password" name="confirm_password" tabindex="4" required>
+					</div>
+					<div class="clearfix"></div>
+				</div>
+				<div class="address submit">
+					<input type="submit" >
+				</div>
+			</form>
+		</div>
+	</div>
+	<!--register-end-->
+	{% endblock %}

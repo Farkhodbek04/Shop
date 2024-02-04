@@ -1,0 +1,124 @@
+{% extends 'front/base.html' %}
+{% load static %}
+{% block content %}
+
+<!--start-breadcrumbs-->
+<div class="breadcrumbs">
+	<div class="container">
+		<div class="breadcrumbs-main">
+			<ol class="breadcrumb">
+				<li><a href="{% url 'index' %}">Home</a></li>
+				<li class="active">Single</li>
+			</ol>
+		</div>
+	</div>
+</div>
+<!--end-breadcrumbs-->
+<!--start-single-->
+<div class="single contact">
+	<div class="container">
+		<div class="single-main">
+			<div class="col-md-9 single-main-left">
+				<div class="sngl-top">
+					<div class="col-md-5 single-top-left">
+						<div class="flexslider">
+							{% for img in images %}
+							<ul class="slides">
+								<li data-thumb="{{ img.images.url }}">
+									<div class="thumb-image"> <img src="{{ img.images.url }}" data-imagezoom="true"
+											class="img-responsive" alt="" /> </div>
+								</li>
+							</ul>
+							{% endfor %}
+						</div>
+						<!-- FlexSlider -->
+						<script src="{% static 'front/js/imagezoom.js' %}"></script>
+						<script defer src="{% static 'front/js/jquery.flexslider.js' %}"></script>
+						<link rel="stylesheet" href="{% static 'front/css/flexslider.css' %}" type="text/css"
+							media="screen" />
+
+						<script>
+							// Can also be used with $(document).ready()
+							$(window).load(function () {
+								$('.flexslider').flexslider({
+									animation: "slide",
+									controlNav: "thumbnails"
+								});
+							});
+						</script>
+					</div>
+					<div class="col-md-7 single-top-right">
+						<div class="single-para simpleCart_shelfItem">
+							<h2>{{product.name}}</h2>
+							<div class="star-on">
+								<ul class="star-footer">
+									{% for _ in review %}
+									<li><a href="#"><i> </i></a></li>
+									{% endfor %}
+								</ul>
+								<div class="review">
+									<a href="#"> {{product.review_numbers}} customer review </a>
+
+								</div>
+								<div class="clearfix"> </div>
+							</div>
+
+							<h5 class="item_price"> 
+							{% if product.currency == 1 %}
+								$ {{ product.price }}
+							{% elif product.currency == 0 %}
+								{{ product.price }} So'm
+							{% elif product.currency == 2 %}
+								{{ product.price }} Rubl
+							{% endif %}</h5>
+							<p>{{product.name}}</p>
+
+
+							<a href="#" class="add-cart item_add">ADD TO CART</a>
+
+						</div>
+					</div>
+					<div class="clearfix"> </div>
+				</div>
+
+				<div class="tabs">
+					<ul class="menu_drop">
+					</ul>
+				</div>
+				<div class="latestproducts">
+					<div class="product-one">
+						{% for recommend in recommendations %}
+						<div class="col-md-4 product-left p-left">
+							<div class="product-main simpleCart_shelfItem">
+								<a href="{% url 'product_detail' recommend.id %}" class="mask"><img class="img-responsive zoom-img" src="{{ recommend.baner_image.url }}" alt="" /></a>
+								<div class="product-bottom">
+									<h3>{{recommend.name}}</h3>
+									<p>Explore Now</p>
+									<h4><a class="item_add" href="{% url 'product_detail' recommend.id %}"><i></i></a> 
+										<span class="item_price">
+										{% if recommend.currency == 1 %}
+											$ {{ recommend.price }}
+										{% elif recommend.currency == 0 %}
+											{{ recommend.price }} So'm
+										{% else %}
+											{{ recommend.price }} Rubl
+										{% endif %}
+										</span></h4>
+								</div>
+								<div class="srch">
+									<span>{{ recommend.currency }}</span>
+								</div>
+							</div>
+						</div>
+						{% endfor %}
+						<div class="clearfix"></div>
+					</div>
+				</div>
+			</div>
+
+			<div class="clearfix"> </div>
+		</div>
+	</div>
+</div>
+<!--end-single-->
+{% endblock %}
