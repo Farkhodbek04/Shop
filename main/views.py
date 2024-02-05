@@ -23,7 +23,7 @@ def index(request):
 
 def products(request):
     products = models.Product.objects.all()
-    return render(request, 'front/products.html', {'products': products})
+    return render(request, 'front/products.html', {'products': products, 'user': request.user})
 
 def product_detail(request, id):
     product = models.Product.objects.get(id=id)
@@ -44,16 +44,17 @@ def product_detail(request, id):
         'categories': categories,
         'recommendations' : recommendations,
         'review': range(review),
+        'user': request.user
         
     }
     
     return render(request, 'front/product_detail.html', context)
 
 def blog(request):
-    return render(request, 'front/blog.html')
+    return render(request, 'front/blog.html', {'user': request.user})
 
 def contact(request):
-    return render(request, 'front/contact.html')
+    return render(request, 'front/contact.html', {'user': request.user})
 
 def sorted_products(request, id):
     categories = models.Category.objects.all()
@@ -67,7 +68,8 @@ def sorted_products(request, id):
         'categories': categories,
         'products': products,
         'sorted_products': sorted_products,
-        'category':category
+        'category':category,
+        'user': request.user
     }
     return render(request, 'front/sorted_products.html', context)
 
@@ -77,7 +79,8 @@ def carts(request):
     inactives = models.Cart.objects.filter(is_active=False, user=request.user)
     context = {
         'actives': actives,
-        'inactives': inactives
+        'inactives': inactives,
+        'user': request.user
     }
     return render(request, 'front/cart/carts.html', context)    
 
@@ -87,7 +90,8 @@ def cart_detail(request, id):
     items = models.CartProduct.objects.filter(cart=cart)
     context = {
         'cart': cart, 
-        'items': items
+        'items': items,
+        'user': request.user
     }
     return render(request, 'front/cart/cart_detail.html', context)
 
@@ -99,7 +103,7 @@ def give_review(request, id):
         product.mark = request.POST['mark']
     product.save()
 
-# Authentication
+# Authentication    
     
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
@@ -127,11 +131,13 @@ def register_user(request):
         try:
             # Create the user
             user = User.objects.create_user(username=username, password=password)
+            user = authenticate(username=username, password=password)
+            login(request, user)
             return redirect('index')
         except Exception as e:
             return render(request, 'front/register.html', {'error_message': f'Error creating user: {str(e)}'})
 
-    return render(request, 'front/register.html')
+    return render(request, 'front/register.html', {'user': request.user})
 
 
 def login_user(request):
@@ -143,10 +149,10 @@ def login_user(request):
             login(request, user)
             return redirect('index')
         else:
-            return render(request, 'front/account.html', {'error_message': 'Invalid username or password'})
+            return render(request, 'front/account.html', {'error_message': 'Invalid username or password', 'user': request.user})
         
 def my_account(request):
-    
+    user =request.user
     if request.user.is_authenticated:
         username = request.user.username
         password = request.user.password
@@ -156,7 +162,7 @@ def my_account(request):
         }
         return render(request, 'front/user_details.html', context)
     else:
-        return render(request, 'front/account.html')
+        return render(request, 'front/account.html', {'user': user})
     
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
@@ -164,7 +170,6 @@ from django.contrib import messages
 def edit_profile(request):
     user = request.user
     if request.method == 'POST':
-        user = request.user
         new_username = request.POST['username']
         new_password = request.POST['password']
 

@@ -25,7 +25,7 @@
 					<form action="{% url 'login_user' %}" method="post">
 						{% csrf_token %}
 						<div class="account-bottom">
-							<input placeholder="Username" type="email" name="username" tabindex="3" required>
+							<input placeholder="Username" type="text" name="username" tabindex="3" required>
 							<input placeholder="Password" type="password" name="password" tabindex="4" required>
 							<div class="address">
 								<a class="forgot" href="#">Forgot Your Password?</a>
