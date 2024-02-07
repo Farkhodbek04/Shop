@@ -16,13 +16,14 @@ class Product(models.Model):
     price = models.DecimalField(decimal_places=2, max_digits=10)
     currency = models.SmallIntegerField(
         choices=(
-            (0,"So'm"),
-            (1, "Dollar"),
-            (2, "Rubl"),
+            (0,"UZS"),
+            (1, "USD"),
+            (2, "RUB"),
         ))
     discount_price = models.DecimalField(decimal_places=2, max_digits=10, blank=True, null=True)
     baner_image = models.ImageField(upload_to='baner/')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
+    creator = models.ForeignKey(User, on_delete=models.DO_NOTHING, default=1)
     
     @property
     def review(self):
@@ -51,6 +52,10 @@ class Product(models.Model):
     
     def __str__(self) -> str:
         return self.name
+    
+    def save(self, *args, **kwargs):
+
+        super(Product, self).save(*args, **kwargs)
 
 
 class ProductReview(models.Model): #This is Product review table
@@ -58,13 +63,31 @@ class ProductReview(models.Model): #This is Product review table
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     mark = models.SmallIntegerField()
 
+    def save(self, *args, **kwargs):
+        object = ProductReview.objects.filter(user=self.user, 
+        product=self.product)
+        if object.count():
+            raise ValueError
+        else:
+            super(ProductReview, self).save(*args, **kwargs)
+
 class Wishlist(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    def save(self, *args, **kwargs):
+        object = models.Wishlist.objects.get(product=self.product, user=self.user)
+        if object.count():
+            raise ValueError
+        else:
+            super(Wishlist, self).save(*args, **kwargs)
+
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     images = models.ImageField(upload_to='baner/')
+
+    def save(self, *args, **kwargs):
+        super(ProductImage, self).save(*args, **kwargs)
 
 
 class Cart(models.Model):
@@ -82,7 +105,7 @@ class Cart(models.Model):
 class CartProduct(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.IntegerField(default=1)
+    quantity = models.IntegerField(default=0)
 
     @property
     def price(self):
@@ -90,6 +113,17 @@ class CartProduct(models.Model):
             return self.product.discount_price * self.quantity
         else:
             return self.product.price * self.quantity
+
+class StockRegion(models.Model):
+    name = models.CharField(max_length=50)   
+
+class ProductInStock(models.Model):
+    name = models.CharField(max_length=100)
+    region = models.ForeignKey(StockRegion, on_delete=models.DO_NOTHING)
+    manzil = models.CharField(max_length=150)
+    product = models.ForeignKey(Product, on_delete=models.DO_NOTHING)
+    added_quantity = models.IntegerField()
+    added_time = models.DateTimeField()
 
 
 

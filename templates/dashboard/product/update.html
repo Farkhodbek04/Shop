@@ -1,0 +1,124 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+
+<!--app-content open-->
+    <div class="main-content app-content mt-0">
+        <div class="side-app">
+                                       <!-- CONTAINER -->
+            <div class="main-container container-fluid">   
+                            <!-- PAGE-HEADER -->
+                <div class="page-header">
+                    <h1 class="page-title">Maxsulot qo'shish</h1>
+                    <div>
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="javascript:void(0)">Pages</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Maxsulot qo'shish</li>
+                        </ol>
+                    </div>
+                </div>
+                <!-- PAGE-HEADER END -->
+    <!-- ROW-1 OPEN -->
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Yangi maxsulot qo'shish</div>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                    <div class="row mb-4">
+                            <label class="col-md-3 form-label">Maxsulot nomi</label>
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" placeholder="{{product.name}}" name="name">
+                            </div>
+                        </div>
+                        <div class="row mb-4">
+                            <label class="col-md-3 form-label">Miqdori</label>
+                            <div class="col-md-6">
+                                <input type="number" class="form-control" name="quantity" placeholder="{{product.quantity}}">
+                            </div>
+                        </div>
+                        <div class="row mb-4">
+                            <label class="col-md-3 form-label">Chegirmadagi narx</label>
+                            <div class="col-md-6">
+                                <input type="number" class="form-control" name="discount_price" placeholder="{{product.discount_price}}">
+                            </div>
+                        </div>
+                        <div class="row mb-4">
+                            <label class="col-md-3 form-label">Narxi :</label>
+                            <div class="col-md-6">
+                                <input type="number" class="form-control" name="price" placeholder="{{product.price}}">
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <label class="col-md-3 form-label">categoriyas :</label>
+                            <div class="col-md-6">
+                                <select name="category_id" class="form-control form-select select2"
+                                    data-bs-placeholder="Select Country">
+                                    {% for i in category %}
+                                    <option value="{{category_id}}">{{i.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-6">
+                            <label class="col-md-3 form-label">Pul birligi :</label>
+                            <div class="col-md-6">
+                                <select name="currency" class="form-control form-select select2">
+    
+                                    <option value="1">So'm</option>
+                                    <option value="2">Dollor</option>
+    
+                                </select>
+                            </div>
+                        </div>
+    
+                        <!-- Row -->
+                        <div class="row">
+                            <label class="col-md-3 form-label mb-4">Maxsulot haqida :</label>
+                            <div class="col-md-6 mb-2">
+                                <textarea class="container-fluid form-control" name="description"
+                                    placeholder="{{product.description}}"></textarea>
+                            </div>
+                        </div>
+                        <!--End Row-->
+    
+                        <!--Row-->
+                        <div class="row">
+                            <label class="col-md-3 form-label mb-4">Maxsulot asosiy rasmi :</label>
+                            <div class="col-md-6">
+                                <input type="file" class="dropify" data-bs-height="180" name="image">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <label class="col-md-3 form-label mb-4">Maxsulot keyingi rasmi :</label>
+                            <div class="col-md-6">
+                                <input id="demo" type="file" name="images" accept=".jpg, .png, image/jpeg, image/png" 
+                                multiple >
+                                
+                        </div>
+                    </div>
+                        <!--End Row-->
+                    </div>
+                    <div class="card-footer">
+                        <!--Row-->
+                        <div class="row">
+                            <div class="col-md-3"></div>
+                            <div class="col-md-6">
+                                <button class="btn btn-primary">O'zgartirish</button>
+                                <button type="reset" class="btn btn-default float-end">Asliga qaytarsh</button>
+                            </form>
+                            </div>
+                        </div>
+                        <!--End Row-->
+                    </div>
+                </div>
+        </div>
+    </div>
+    <!-- /ROW-1 CLOSED -->
+
+<!-- CONTAINER CLOSED -->
+{% endblock %}
