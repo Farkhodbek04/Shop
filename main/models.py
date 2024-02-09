@@ -1,3 +1,4 @@
+from typing import Any
 from django.db import models
 from django.contrib.auth.models import User
 from functools import reduce
@@ -76,11 +77,13 @@ class Wishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
-        object = models.Wishlist.objects.get(product=self.product, user=self.user)
-        if object.count():
-            raise ValueError
-        else:
-            super(Wishlist, self).save(*args, **kwargs)
+        try:
+            Wishlist.objects.get(product=self.product, user=self.user)
+            # If the object exists, raise a ValueError
+            raise ValueError("Wishlist item already exists")
+        except Wishlist.DoesNotExist:
+            # If the object does not exist, save it
+            super().save(*args, **kwargs)
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -114,16 +117,29 @@ class CartProduct(models.Model):
         else:
             return self.product.price * self.quantity
 
-class StockRegion(models.Model):
-    name = models.CharField(max_length=50)   
-
-class ProductInStock(models.Model):
-    name = models.CharField(max_length=100)
-    region = models.ForeignKey(StockRegion, on_delete=models.DO_NOTHING)
-    manzil = models.CharField(max_length=150)
-    product = models.ForeignKey(Product, on_delete=models.DO_NOTHING)
+class ProductSupply(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    product_name = models.CharField(max_length=100)
     added_quantity = models.IntegerField()
-    added_time = models.DateTimeField()
+    added_time = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self) -> str:
+        return self.product_name
+
+    def save(self, *args, **kwargs):
+        if self.product:
+            if self.pk:
+                # update
+                enter = ProductSupply.objects.get(pk=self.pk)
+                product = enter.product
+                product.quantity -= self.added_quantity
+                product.quantity += self.added_quantity
+                product.save()
+            else:
+                # set
+                self.product.quantity += self.added_quantity
+                self.product.save()
+            super(ProductSupply, self).save(*args, **kwargs)
 
 
 

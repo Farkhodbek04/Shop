@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import  login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+import pandas as pd
+
 
 
 # FRONT
@@ -14,7 +16,10 @@ def index(request):
     is_liked  = []
     for product in products:
         try:
-            liked = models.Wishlist.objects.filter(product_id=product.id, user=user).exists()
+            if user.is_authenticated:
+                liked = models.Wishlist.objects.filter(product_id=product.id, user=user).exists()
+            else:
+                liked = models.Wishlist.objects.filter(product_id=product.id).exists()
         except models.Wishlist.DoesNotExist:
             liked = None
         is_liked.append(liked)
@@ -30,12 +35,15 @@ def index(request):
 
 def like_in_index(request, id):
     user = request.user
-    wishlist_product = models.Product.objects.get(id=id)
-    models.Wishlist.objects.create(
-        user=user,
-        product=wishlist_product
-    )
-    return redirect('index')
+    if user.is_authenticated:
+        wishlist_product = models.Product.objects.get(id=id)
+        models.Wishlist.objects.create(
+            user=user,
+            product=wishlist_product
+        )
+        return redirect('index')
+    else: raise Exception("You should log in!")
+    
 
 def dislike_in_index(request, id):
     user = request.user
@@ -53,7 +61,10 @@ def product_detail(request, id):
     user = request.user
     # wishlist_product = models.Wishlist.objects.get(product_id=id, user=user)
     try:
-        is_liked = models.Wishlist.objects.filter(product_id=id, user=user)
+        if user.is_authenticated:
+            is_liked = models.Wishlist.objects.filter(product_id=id, user=user).exists()
+        else:
+            is_liked = models.Wishlist.objects.filter(product_id=id).exists()
     except models.Wishlist.DoesNotExist:
         is_liked = None
     product = models.Product.objects.get(id=id)
@@ -107,12 +118,14 @@ def sorted_products(request, id):
 
 def like_in_detail(request, id):
     user = request.user
-    wishlist_product = models.Product.objects.get(id=id)
-    models.Wishlist.objects.create(
-        user=user,
-        product=wishlist_product
-    )
-    return redirect('product_detail', id=id)
+    if user.is_authenticated:
+        wishlist_product = models.Product.objects.get(id=id)
+        models.Wishlist.objects.create(
+            user=user,
+            product=wishlist_product
+        )
+        return redirect('product_detail', id=id)
+    else: raise Exception("You should log in!")
 
 def dislike_in_detail(request, id):
     user = request.user
@@ -342,6 +355,73 @@ def create_product(request):
             )
         return redirect("product_list_dashboard")
     return render(request, 'dashboard/product/create.html', { 'categories': categories})
+
+def create_enter(request):
+    if request.method == 'POST':
+        product_id = request.POST['product_id']
+        quantity = int(request.POST['quantity'])
+        models.ProductSupply.objects.create(
+            product_id=product_id,
+            added_quantity=quantity
+        )
+        return redirect('list_enter')
+    return render(request, 'dashboard/enter/create.html', {'products':models.Product.objects.all()})
+
+
+def update_enter(request, id):
+    if request.method == 'POST':
+        quantity = int(request.POST['quantity'])
+        enter = models.ProductSupply.objects.get(id=id)
+        enter.added_quantity = quantity
+        enter.save()
+    return redirect('list_enter')
+
+
+def delete_enter(request, id):
+    models.ProductSupply.objects.get(id=id).delete()
+    return redirect('list_enter')
+
+
+def list_enter(request):
+    enters = models.ProductSupply.objects.all()
+    context = {'enters':enters}
+    return render(request, 'dashboard/enter/list.html', context)
+
+def enter_write(request):
+    enters = models.ProductSupply.objects.all()
+
+    data = {
+        'Maxsulot nomi': [enter.product.name for enter in enters],
+        'Maxsulot soni': [enter.added_quantity for enter in enters],
+        'Maxsulot qo\'shilgan sana': [enter.added_time.strftime('%Y-%m-%d %H:%M:%S') for enter in enters],
+    }
+
+    result = pd.DataFrame(data)
+    path = 'enteries.xlsx'
+    result.to_excel(path, sheet_name="Enteries", index=False)
+
+    with open(path, 'rb') as excel_data:
+        content = excel_data.read()
+
+    response = HttpResponse(content, content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response['Content-Disposition'] = 'attachment; filename=enter.xlsx'
+    
+    # Qator uzunligi uchun
+    response['Maxsulot qator uzunligi'] = f'{max(map(len, data.values())) * 20}px' if data else '0px'
+    return response
+
+from collections import defaultdict
+
+def sold(request):
+    cartproducts = models.CartProduct.objects.filter(cart__is_active=False)
+    
+    dict1 = defaultdict(int)
+    for cartproduct in cartproducts:
+        dict1[cartproduct.product.name] += cartproduct.quantity
+    result_list = [{'name': name, 'total_quantity': total_quantity} for name, total_quantity in dict1.items()]
+
+    return render(request, 'dashboard/sold/list.html', {'result_list': result_list})
+
 
 
 

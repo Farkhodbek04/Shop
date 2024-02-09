@@ -1,0 +1,99 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+<!--app-content open-->
+    <div class="main-content app-content mt-0">
+        <div class="side-app">
+
+            <!-- CONTAINER -->
+            <div class="main-container container-fluid">
+
+                <!-- PAGE-HEADER -->
+                <div class="page-header">
+                    <h1 class="page-title">Chiqimlar</h1>
+                </div>
+                <!-- PAGE-HEADER END -->
+                
+                <!-- Row -->
+                <div class="row">
+                    <div class="col-3"></div>
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Chiqimlar ro`yxati</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table text-nowrap text-md-nowrap mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>№</th>
+                                                <th>Maxsulot nomi</th>
+                                                <th>Soni</th>
+                                                
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for enter in result_list %}
+                                            <tr>
+                                                <td>{{forloop.counter}}</td>
+                                                <td>{{enter.name}}</td>
+                                                <td>{{enter.total_quantity}}</td>
+                                                
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Row -->
+                {% for i in enters %}
+                <div class="modal fade" id="modalupdate{{i.id}}">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content modal-content-demo">
+                            <div class="modal-header">
+                                <h6 class="modal-title">Kirimni o`zgartirish</h6><button aria-label="Close" class="btn-close" data-bs-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="{% url 'update_enter' i.id %}" method="post">
+                                    {% csrf_token %}
+                                    <input type="text" class="form-control" name="quantity" value="{{i.quantity}}">
+                                
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-primary" type="submit">Saqlash</button> 
+                                <button class="btn btn-light" data-bs-dismiss="modal">Qaytish</button>
+                            </form>    
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade" id="modaldelete{{i.id}}">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content modal-content-demo">
+                            <div class="modal-header">
+                                <h6 class="modal-title">Maxsulotni o`chriish</h6><button aria-label="Close" class="btn-close" data-bs-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="{% url 'delete_enter' i.id %}" method="get">
+                                    <label for="my_chkb">O`chirmoqchimisiz? </label>
+                                    <input type="checkbox" required id="my_chkb">
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn btn-primary" type="submit">O`chrish</button> 
+                                    <button class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <!-- CONTAINER CLOSED -->
+
+        </div>
+    </div>
+    <!--app-content close-->
+    {% endblock %}

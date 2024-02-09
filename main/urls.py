@@ -11,12 +11,19 @@ urlpatterns=[
     path('contact/', views.contact, name='contact'),
     path('product-detail/like/<int:id>', views.like_in_detail, name='like_in_detail'),
     path('product-detail/dislike/<int:id>', views.dislike_in_detail, name='dislike_in_detail'),
-    # url
     path('index/like/<int:id>', views.like_in_index, name='like_in_index'),
     path('index/dislike/<int:id>', views.dislike_in_index, name='dislike_in_index'),
     path('sorted-products/<int:id>', views.sorted_products, name='sorted_products'),
     path('cart/', views.carts, name='cart'),
     path('cart/cart-detail/<int:id>', views.cart_detail, name='cart_detail'),
+        # enters
+    path('enter-list', views.list_enter, name='list_enter'),
+    path('enter-create', views.create_enter, name='create_enter'),
+    path('enter-write', views.enter_write, name='enter_write'),
+    path('enter-update/<int:id>/', views.update_enter, name='update_enter'),
+    path('enter-delete/<int:id>/', views.delete_enter, name='delete_enter'),
+    # sold products
+    path('sold', views.sold, name='sold'),
     # Authentication
     path('register/', views.register_user, name='register'),
     path('account/', views.my_account, name='my_account'),
@@ -32,6 +39,6 @@ urlpatterns=[
     path('dashboard/delete-category/<int:id>', views.delete_category, name='delete_category'),
      #dashboard/product CRUD
     path('dashboard/product-list', views.product_list_dashboard, name='product_list_dashboard'),
-    path('dashboard/create-product', views.create_product, name='create_product')
+    path('dashboard/create-product', views.create_product, name='create_product'),
 
 ]
