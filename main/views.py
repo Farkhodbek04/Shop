@@ -378,6 +378,10 @@ def update_enter(request, id):
 
 
 def delete_enter(request, id):
+    enter_product = models.ProductSupply.objects.get(id=id)
+    product = models.Product.objects.get(id=enter_product.product.id)
+    product.quantity -= enter_product.added_quantity
+    product.save()
     models.ProductSupply.objects.get(id=id).delete()
     return redirect('list_enter')
 
