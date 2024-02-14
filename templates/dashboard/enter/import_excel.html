@@ -20,34 +20,24 @@
                     <div class="col-xl-6 col-lg-12">
                         <div class="card">
                             <div class="card-header">
-                                <h3 class="card-title">Maxsulotga kirim qilish</h3>
-                                <div style="width: 70%; float: right;"><a href="{% url 'upload_excel' %}"><button class="btn btn-success" >Excel filedan</button></a></div>
+                                <h3 class="card-title">Maxsulot kirimini excel filedan yuklash</h3>
                             </div>
-                            <form method='post' enctype="multipart/form-data"> 
+                            <form    method='post' enctype="multipart/form-data"> 
                                 {% csrf_token %} 
-                            <div class="card-body pb-2">
-                                <div class="row row-sm">
-                                    <div class="form-group">
-                                        <label>Maxsulotlar</label>
-                                        <select class="form-control select2" name="product_id">
-                                        {% for product in products %}
-                                        <option value="{{product.id}}">{{product.name}}</option>
-                                        {% endfor %}
-                                    </select>
-                                        <label>Miqdor</label>
-                                        <input class="form-control mb-4" required type="number" name="quantity">
+                                <div class="card-body pb-2">
+                                    <div class="row row-sm">
+                                        <label for="file" class="form-label">Excel file yuklang:</label>
+                                        <input type="file" class="form-control custom-file-input" id="file" name="file" >
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-9"></div>
+                                        <div class="col" style="display: flex; margin-top: 15px;">
+                                            <button type="submit" class='btn btn-default btn-primary'>Qo'shish</button>  
                                         </div>
-                                </div>
-                                
-                                <div class="row">
-                                    <div class="col-9"></div>
-                                    <div class="col">
-                                        <button class='btn btn-default btn-pill'>Yaratish</button>
                                     </div>
                                 </div>
-                            </div>
-                        </form>
-                        
+                            </form>
                         </div>
                     </div>
                 </div>

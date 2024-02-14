@@ -1,10 +1,14 @@
+from .funcs import filter_enters, filter_products, paginate_products
+
 from django.shortcuts import render, redirect
-from . import models
 from django.contrib.auth.models import User
 from django.contrib.auth import  login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+
+from . import models
 import pandas as pd
+
 
 
 
@@ -304,13 +308,16 @@ def delete_category(request, id):
 
  # dashboard/product
 def product_list_dashboard(request):
-    products = models.Product.objects.all()
-    context = {
-        'products': products,
-    }
-    return render(request, 'dashboard/product/list.html', context)
+    if request.method == 'GET':
+        result = filter_products(request)   
+        products = models.Product.objects.filter(**result)
+        print(products)
+        context = {
+            'products': paginate_products(products, 3, request),
+        }
+        return render(request, 'dashboard/product/list.html', context)
 
-def create_product(request):
+def create_product(request):        
     # users = [user.username for user in models.User.objects.all()]
     user = request.user
     categories = models.Category.objects.all()
@@ -367,6 +374,57 @@ def create_enter(request):
         return redirect('list_enter')
     return render(request, 'dashboard/enter/create.html', {'products':models.Product.objects.all()})
 
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from openpyxl import load_workbook
+from .models import ProductSupply
+
+def upload_excel(request):
+    if request.method == 'POST' and request.FILES['file']:
+        excel_file = request.FILES['file']
+        file = request.FILES['file'].name
+
+        with open(file, 'wb+') as destination:
+            for chunk in excel_file.chunks():
+                destination.write(chunk)
+
+        excel_data = pd.read_excel(file)
+        for index, row in excel_data.iterrows():
+            product_name = row['product_name']
+            id = row['id']
+            added_quantity = row['added_quantity']
+            added_time = row['added_time']
+            models.ProductSupply.objects.create(
+                product_name=product_name,
+                id=id,
+                added_quantity=added_quantity,
+                added_time=added_time,
+            )
+
+        return redirect('list_enter')
+    return render(request, 'dashboard/enter/import_excel.html')
+
+# from datetime import datetime
+# from django.core.exceptions import ObjectDoesNotExist
+# def search_enter(request):
+#     quantity = request.GET.get('quantity')
+#     product_name = request.GET.get('name')      
+#     print("Quantity:", quantity)  # Debug statement
+#     print("Product Name:", product_name)  # Debug statement
+
+#     if product_name and quantity:
+#         try:
+#             enters = models.ProductSupply.objects.filter(
+#                 added_quantity=quantity,
+#                 product__name=product_name.strip()  # Remove leading/trailing whitespace
+#             )
+#             print("Filtered Enters:", enters)  # Debug statement
+#             return render(request, 'dashboard/enter/search.html', {'enters': enters})
+#         except Exception as e:
+#             print("Error:", e)  # Print any errors for debugging
+#             # Handle error gracefully, perhaps return an empty queryset or an error page
+#             return render(request, 'dashboard/enter/search.html', {'enters': None})
+# from .funcs import filter_enters
 
 def update_enter(request, id):
     if request.method == 'POST':
@@ -385,19 +443,23 @@ def delete_enter(request, id):
     models.ProductSupply.objects.get(id=id).delete()
     return redirect('list_enter')
 
-
+from .funcs import filter_enters
 def list_enter(request):
-    enters = models.ProductSupply.objects.all()
-    context = {'enters':enters}
+    result = filter_enters(request)
+    print(result)
+    enters = models.ProductSupply.objects.filter(**result)
+    print(enters)
+    context = {'enters':enters} 
     return render(request, 'dashboard/enter/list.html', context)
 
 def enter_write(request):
     enters = models.ProductSupply.objects.all()
 
     data = {
-        'Maxsulot nomi': [enter.product.name for enter in enters],
-        'Maxsulot soni': [enter.added_quantity for enter in enters],
-        'Maxsulot qo\'shilgan sana': [enter.added_time.strftime('%Y-%m-%d %H:%M:%S') for enter in enters],
+        'product_name': [enter.product.name for enter in enters],
+        'id': [enter.product.id for enter in enters],
+        'added_quantity': [enter.added_quantity for enter in enters],
+        'added_time': [enter.added_time.strftime('%Y-%m-%d %H:%M:%S') for enter in enters],
     }
 
     result = pd.DataFrame(data)
@@ -425,6 +487,7 @@ def sold(request):
     result_list = [{'name': name, 'total_quantity': total_quantity} for name, total_quantity in dict1.items()]
 
     return render(request, 'dashboard/sold/list.html', {'result_list': result_list})
+
 
 
 

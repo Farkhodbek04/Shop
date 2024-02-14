@@ -10,7 +10,12 @@
 
                         <!-- PAGE-HEADER -->
                         <div class="page-header">
-                            <h1 class="page-title">Productlar</h1>
+                            <form action="{% url 'product_list_dashboard' %}" method="get" class="d-flex">
+                                <label for="name">Maxsulot nom</label>
+                                <input class="form-control" type="text" name="name" id="name" >
+                                <label for="creator">Egasi</label>
+                                <input class="form-control" type="text" name="creator" id="creator"><button style="display: flex; justify-content: center; margin-bottom: auto; " type="submit" class="btn btn-success w-50 ms-1" >Filter</button>
+                            </form>
                         </div>
                         <!-- PAGE-HEADER END -->
                         
@@ -45,6 +50,43 @@
                                                     {% endfor %}
                                                 </tbody>
                                             </table>
+                                        </div>
+                                        <br>
+                                        <div class="d-flex justify-content-right" >
+                                            
+                                            <ul class="pagination">
+                                                <li class="page-item page-prev">
+                                                    <a class="page-link" href="javascript:void(0)" tabindex="-1">Prev</a>
+                                                </li>
+                                                <li class="page-item active"><a class="page-link" href="javascript:void(0)">1</a></li>
+                                                <li class="page-item"><a class="page-link" href="javascript:void(0)">2</a></li>
+                                                <li class="page-item"><a class="page-link" href="javascript:void(0)">3</a></li>
+                                                <li class="page-item"><a class="page-link" href="javascript:void(0)">4</a></li>
+                                                <li class="page-item page-next">
+                                                    <a class="page-link" href="javascript:void(0)">Next</a>
+                                                </li>                   
+                                            </ul>
+                                            <div class="col-12 text-right">
+                                                {% if products.paginator.num_pages > 1 %}
+                                                    <nav aria-label="Page navigation example" class="text-end">
+                                                        <ul class="pagination">
+                                                            {% if products.has_previous %}
+                                                            <li class="page-item page-prev"><a class="page-link" href="?page={{ products.previous_page_number  }}"><<</a></li>
+                                                            {% endif %}
+                                                            {% for num in products.paginator.page_range %}
+                                                            {% if num == products.number %}
+                                                            <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                                                            {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+                                                            <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                                                            {% endif %}
+                                                            {% endfor %}
+                                                            {% if products.has_next %}
+                                                            <li class="page-item page-next"><a class="page-link" href="?page={{ products.next_page_number }}">>></a></li>
+                                                            {% endif %}
+                                                        </ul>
+                                                    </nav>
+                                                {% endif %}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

@@ -9,8 +9,16 @@
 
                 <!-- PAGE-HEADER -->
                 <div class="page-header">
-                    <h1 class="page-title">Kirimlar</h1>
-                    <a href="{% url 'enter_write' %}"  ><button href="{% url 'enter_write' %}" class="btn btn-primary">Generate in excel format</button></a>
+                    <form method="get" class="d-flex">
+                        <label for="product_name">Maxsulot nom</label>
+                        <input class="form-control" type="text" name="product_name" id="product_name" >
+                        <label for="added_quantity">Miqdor</label>
+                        <input class="form-control" type="number" name="added_quantity" id="added_quantity">
+                        <label for="added_time">Sana</label>
+                        <input class="form-control" type="datetime-local" name="added_time" id="added_time">
+                        <a href="{% url 'list_enter' %}"><button style="display: flex; justify-content: center;" type="submit" class="btn btn-success w-50 ms-1" >Filter</button></a>
+                    </form>
+                    <a href="{% url 'enter_write' %}"  ><button class="btn btn-primary">Generate in excel format</button></a>
                 </div>
                 <!-- PAGE-HEADER END -->
                 
@@ -45,7 +53,7 @@
                                                 <td>{{enter.product_name}}</td>
                                                 {% endif %}
                                                 <td>{{enter.added_quantity}}</td>
-                                                <td>{{enter.added_time|date:'Y-m-d H:i'}}</td>
+                                                <td>{{enter.added_time}}</td>
                                                 {% if enter.product %}
                                                 <td><button data-bs-target="#modalupdate{{enter.id}}" data-bs-toggle="modal" href="javascript:void(0)" class="btn btn-success">O'zgartirish</button></td>
                                                 {% else %}

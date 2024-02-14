@@ -19,7 +19,9 @@ urlpatterns=[
         # enters
     path('enter-list', views.list_enter, name='list_enter'),
     path('enter-create', views.create_enter, name='create_enter'),
+    path('enter-create-with-excel', views.upload_excel, name='upload_excel'),
     path('enter-write', views.enter_write, name='enter_write'),
+    # path('enter-filter_enters', views.filter_enters, name='filter_enters'),
     path('enter-update/<int:id>/', views.update_enter, name='update_enter'),
     path('enter-delete/<int:id>/', views.delete_enter, name='delete_enter'),
     # sold products
