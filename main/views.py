@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import  login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.exceptions import FieldError
 
 from . import models
 import pandas as pd
@@ -310,8 +311,10 @@ def delete_category(request, id):
 def product_list_dashboard(request):
     if request.method == 'GET':
         result = filter_products(request)   
-        products = models.Product.objects.filter(**result)
-        print(products)
+        try:
+            products = models.Product.objects.filter(**result)
+        except FieldError:
+            products = models.Product.objects.all()
         context = {
             'products': paginate_products(products, 3, request),
         }
@@ -376,7 +379,7 @@ def create_enter(request):
 
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from openpyxl import load_workbook
+# from openpyxl import load_workbook
 from .models import ProductSupply
 
 def upload_excel(request):

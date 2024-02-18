@@ -31,3 +31,4 @@ def paginate_products(products, num, request):
         products = paginator.page(1)
     except EmptyPage:
         products = paginator.page(paginator.num_pages)
+    return products
