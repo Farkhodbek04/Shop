@@ -56,6 +56,19 @@ class   ReviewSer(ModelSerializer):
     class Meta:
         model = models.ProductReview
         fields = '__all__'
+class   CartSer(ModelSerializer):
+    """ It serializes Cart products """
+    depth = 2   
+    class Meta:
+        model = models.CartProduct
+        fields = '__all__'
+
+
+class CartProductSer(ModelSerializer):
+    depth = 2
+    class Meta:
+        model = models.CartProduct
+        fields = '__all__'
 
     
         

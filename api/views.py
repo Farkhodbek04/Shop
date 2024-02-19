@@ -90,6 +90,29 @@ def review_product(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response({'error': 'product_id, user_id, and mark are required fields'}, status=400)
 
+@api_view(['GET']) # It return products in user's active cart.
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def active_cart(request):
+    product = models.CartProduct.objects.filter(cart__is_active=True)
+    serializer = serializers.CartSer(product, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET']) # It return products in user's inactive cart.
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def inactive_cart(request):
+    product = models.CartProduct.objects.filter(cart__is_active=False)
+    serializer = serializers.CartSer(product, many=True)
+    return Response(serializer.data)
+
+# @api_view(['POST']) # It adds products to user's cart.
+# @authentication_classes([SessionAuthentication, BasicAuthentication])
+# @permission_classes([IsAuthenticated])
+# def add_to_cart(request):
+#     product_id = request.data.get('product_id')
+
+
 @api_view(['GET']) # New entered products to the stock in dahsboard
 def dash_enter_list(request):
     enters = models.ProductSupply.objects.all()
