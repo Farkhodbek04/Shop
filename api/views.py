@@ -1,10 +1,15 @@
 from collections import defaultdict
 
+
 from . import serializers
 from main import models
 
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+
 
 # CATEGORY
 @api_view(['GET']) # It shows list of categories in dashboard
@@ -43,10 +48,47 @@ def product_detail(request, id):
     return Response(product_data)
 
 # WISHLIST
-@api_view(['GET']) # New entered products to the stock in dahsboard
-def wishlist(request, id):
-    ...
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def like_or_dislike(request):
+    # Extract product and user IDs from the request
+    product_id = request.data.get('product_id')  # Assuming 'product_id' is in request data
+    user_id = request.data.get('user_id')  # Assuming 'user_id' is in request data
+    
+    if product_id and user_id:
+        try:
+            like = models.Wishlist.objects.get(product_id=product_id, user_id=user_id)
+            like.delete()
+            return Response(status=status.HTTP_200_OK)
+        except models.Wishlist.DoesNotExist:
+            serializer = serializers.WishlistSer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response({'error': 'Product ID and user ID are required in the request data.'}, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def review_product(request):
+    product_id = request.data.get('product_id')  # Assuming 'product_id' is in request data
+    user_id = request.data.get('user_id')  # Assuming 'user_id' is in request data
+    mark = request.data.get('mark')
+    if product_id and user_id and mark is not None:
+        try:
+            review = models.ProductReview.objects.get(product_id=product_id, user_id=user_id, mark=mark)
+            review.mark = mark
+            review.save()
+            serializer = serializers.ReviewSer(review)
+            return Response(serializer.data)
+        except models.ProductReview.DoesNotExist:
+            review = models.ProductReview.objects.create(product_id=product_id, user_id=user_id, mark=mark)
+            serializer = serializers.ReviewSer(review)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response({'error': 'product_id, user_id, and mark are required fields'}, status=400)
 
 @api_view(['GET']) # New entered products to the stock in dahsboard
 def dash_enter_list(request):

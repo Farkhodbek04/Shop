@@ -47,6 +47,15 @@ class   WishlistSer(ModelSerializer):
     depth = 2   
     class Meta:
         model = models.Wishlist
+        fields = '__all__'
+        
+
+class   ReviewSer(ModelSerializer):
+    """ It serializes reviews """
+    depth = 2   
+    class Meta:
+        model = models.ProductReview
+        fields = '__all__'
 
     
         
