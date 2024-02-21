@@ -16,6 +16,9 @@ urlpatterns = [
 
     path('dashboard/enters-list', views.dash_enter_list),
     path('dashboard/sold-list', views.dash_sold_list),
+    # Log in
+    path('log-in', views.log_in),
+    path('register', views.register),
     
     
     

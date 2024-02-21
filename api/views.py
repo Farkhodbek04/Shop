@@ -3,9 +3,12 @@ from collections import defaultdict
 
 from . import serializers
 from main import models
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework import authentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authtoken.models import Token
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -49,7 +52,7 @@ def product_detail(request, id):
 
 # WISHLIST
 @api_view(['POST'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
+@authentication_classes([authentication.TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def like_or_dislike(request):
     # Extract product and user IDs from the request
@@ -71,7 +74,7 @@ def like_or_dislike(request):
         return Response({'error': 'Product ID and user ID are required in the request data.'}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
+@authentication_classes([authentication.TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def review_product(request):
     product_id = request.data.get('product_id')  # Assuming 'product_id' is in request data
@@ -91,7 +94,7 @@ def review_product(request):
     return Response({'error': 'product_id, user_id, and mark are required fields'}, status=400)
 
 @api_view(['GET']) # It return products in user's active cart.
-@authentication_classes([SessionAuthentication, BasicAuthentication])
+@authentication_classes([authentication.TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def active_cart(request):
     product = models.CartProduct.objects.filter(cart__is_active=True)
@@ -99,7 +102,7 @@ def active_cart(request):
     return Response(serializer.data)
 
 @api_view(['GET']) # It return products in user's inactive cart.
-@authentication_classes([SessionAuthentication, BasicAuthentication])
+@authentication_classes([authentication.TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def inactive_cart(request):
     product = models.CartProduct.objects.filter(cart__is_active=False)
@@ -130,6 +133,22 @@ def dash_sold_list(request):
 
     return Response(serializer.data)
 
+# Log in 
+@api_view(['GET']) 
+def log_in(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    user = authenticate(username=username, password=password)
+    if user is not None:
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response({'Token': token.key})
+    return Response({'error': 'Invalid credentials'}, status=401)
 
 
-    
+@api_view(['POST']) 
+def register(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    user = User.objects.create_user(username=username, password=password)
+    token = Token.objects.create(user=user)
+    return Response({'user': user.username, 'token':token.key})

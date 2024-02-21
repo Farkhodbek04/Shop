@@ -2,6 +2,11 @@ from rest_framework.serializers import ModelSerializer, Serializer
 from rest_framework import serializers
 
 from main import models
+
+class UserSer(ModelSerializer):
+    ...
+
+
 # CATEGORY
 class CategoryListSer(ModelSerializer): 
     """ It serializes list of categories in dashboard. """

@@ -1,13 +1,24 @@
 from typing import Any
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.text import slugify
+import uuid
+
 from functools import reduce
+from unidecode import unidecode
+import slug
 
 class Category(models.Model):
     name = models.CharField(max_length=50)
+    slug = models.SlugField(unique=True, blank=True)
     
     def __str__(self) -> str:
         return self.name
+    
+    def save(self, *args, **kwargs):
+        self.slug = Category.slug.slug(unidecode(self.name, 'UTF-8'))
+        super(Category, self).save(*args, **kwargs)
+
     
     
 class Product(models.Model):
@@ -25,6 +36,7 @@ class Product(models.Model):
     baner_image = models.ImageField(upload_to='baner/')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING, default=1)
+    slug = models.SlugField(unique=True, blank=True)
     
     @property
     def review(self):
@@ -55,7 +67,11 @@ class Product(models.Model):
         return self.name
     
     def save(self, *args, **kwargs):
-
+        if not self.slug:
+            base_slug = slugify(self.name)
+            unique_id = uuid.uuid4().hex[:6]  # Generate a unique identifier
+            self.slug = f"{base_slug}-{unique_id}"
+            self.slug = Product.slug.slug(unidecode(self.slug, 'UTF-8'))
         super(Product, self).save(*args, **kwargs)
 
 
@@ -93,9 +109,14 @@ class ProductImage(models.Model):
         super(ProductImage, self).save(*args, **kwargs)
 
 
+from django.utils.text import slugify
+from unidecode import unidecode
+import uuid
+
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
+    slug = models.SlugField(blank=True)
 
     @property
     def quantity(self):
@@ -104,6 +125,16 @@ class Cart(models.Model):
     @property
     def total_price(self):
         return sum(cart_product.price for cart_product in self.cartproduct_set.all())
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.user.username)
+            unique_id = uuid.uuid4().hex[:6]  # Generate a unique identifier
+            self.slug = f"{base_slug}-{unique_id}"
+            self.slug = unidecode(self.slug)
+        super(Cart, self).save(*args, **kwargs)
+
+    
 
 class CartProduct(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
@@ -122,6 +153,7 @@ class ProductSupply(models.Model):
     product_name = models.CharField(max_length=100)
     added_quantity = models.IntegerField()
     added_time = models.DateTimeField(auto_now_add=True)
+    slug = models.SlugField(unique=True, blank=True)
     
     def __str__(self) -> str:
         return self.product_name
@@ -139,6 +171,14 @@ class ProductSupply(models.Model):
                 # set
                 self.product.quantity += self.added_quantity
                 self.product.save()
+            
+            if not self.slug:
+                base_slug = slugify(self.product_name)
+                unique_id = uuid.uuid4().hex[:6]  # Generate a unique identifier
+                self.slug = f"{base_slug}-{unique_id}"
+                self.slug = Cart.slug.slug(unidecode(self.slug, 'UTF-8'))
+
+
             super(ProductSupply, self).save(*args, **kwargs)
 
 
